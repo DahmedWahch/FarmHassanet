@@ -12,7 +12,10 @@ export const api = axios.create({
   timeout: 30000,
 })
 
-export async function detectImage(file: File): Promise<DetectionResult> {
+export async function detectImage(
+  file: File,
+  signal?: AbortSignal,
+): Promise<DetectionResult> {
   const formData = new FormData()
   formData.append('image', file)
 
@@ -20,6 +23,7 @@ export async function detectImage(file: File): Promise<DetectionResult> {
     headers: {
       'Content-Type': 'multipart/form-data',
     },
+    signal,
   })
 
   return response.data

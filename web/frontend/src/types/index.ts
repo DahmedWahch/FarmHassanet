@@ -51,7 +51,7 @@ export interface AppSettings {
   blurIntensity: number
   detectFaces: boolean
   detectNsfw: boolean
-  blurMode: 'all_faces' | 'women_only' | 'men_only'
+  blurMode: 'all_faces' | 'women_only' | 'men_only' | 'off'
   genderThreshold: number
 }
 
