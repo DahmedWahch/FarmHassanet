@@ -16,9 +16,10 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.logging.HttpLoggingInterceptor
 
 class DetectionClient(
-  private val baseUrl: String = "http://10.0.2.2:3001",
+  private var baseUrl: String = "http://10.0.2.2:3001",
 ) {
   private val gson = Gson()
+  private val jsonMediaType = "application/json; charset=utf-8".toMediaType()
 
   private val httpClient: OkHttpClient = OkHttpClient.Builder()
     .addInterceptor(
@@ -58,18 +59,22 @@ class DetectionClient(
     }
   }
 
-  suspend fun getSettings(): AppSettings = withContext(Dispatchers.IO) {
-    val request = Request.Builder()
-      .url("$baseUrl/api/settings")
-      .get()
-      .build()
+  suspend fun getSettings(): AppSettings? = withContext(Dispatchers.IO) {
+    return@withContext try {
+      val request = Request.Builder()
+        .url("$baseUrl/api/settings")
+        .get()
+        .build()
 
-    httpClient.newCall(request).execute().use { response ->
-      if (!response.isSuccessful) {
-        throw IOException("Settings request failed: ${response.code}")
+      httpClient.newCall(request).execute().use { response ->
+        if (!response.isSuccessful) {
+          return@withContext null
+        }
+        val body = response.body?.string() ?: return@withContext null
+        gson.fromJson(body, AppSettings::class.java)
       }
-      val body = response.body?.string() ?: throw IOException("Empty settings response.")
-      gson.fromJson(body, AppSettings::class.java)
+    } catch (_: IOException) {
+      null
     }
   }
 
@@ -102,5 +107,29 @@ class DetectionClient(
     } catch (_: IOException) {
       null
     }
+  }
+
+  suspend fun saveSettings(settings: AppSettings): AppSettings? = withContext(Dispatchers.IO) {
+    return@withContext try {
+      val json = gson.toJson(settings)
+      val request = Request.Builder()
+        .url("$baseUrl/api/settings")
+        .post(json.toRequestBody(jsonMediaType))
+        .build()
+
+      httpClient.newCall(request).execute().use { response ->
+        if (!response.isSuccessful) {
+          return@withContext null
+        }
+        val body = response.body?.string() ?: return@withContext null
+        gson.fromJson(body, AppSettings::class.java)
+      }
+    } catch (_: IOException) {
+      null
+    }
+  }
+
+  fun updateBaseUrl(url: String) {
+    baseUrl = url
   }
 }
