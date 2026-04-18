@@ -5,6 +5,7 @@ import com.haramblur.data.AppSettings
 import com.haramblur.data.DetectionResult
 import com.haramblur.data.ModelsStatus
 import java.io.IOException
+import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType.Companion.toMediaType
@@ -94,4 +95,12 @@ class DetectionClient(
         gson.fromJson(body, DetectionResult::class.java)
       }
     }
+
+  suspend fun detect(imageBytes: ByteArray): DetectionResult? = withContext(Dispatchers.IO) {
+    return@withContext try {
+      detectImage("frame-${UUID.randomUUID()}.jpg", imageBytes)
+    } catch (_: IOException) {
+      null
+    }
+  }
 }
