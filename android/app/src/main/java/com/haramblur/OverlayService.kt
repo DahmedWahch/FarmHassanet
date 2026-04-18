@@ -38,9 +38,6 @@ class OverlayService : LifecycleService() {
     const val NOTIFICATION_ID = 101
     const val CHANNEL_ID = "haramblur_service"
     private const val TAG = "OverlayService"
-
-    // Detection image width — backend scales detection boxes to this width
-    // We send frames at this width, then scale boxes back to screen coordinates
     const val DETECT_WIDTH = 640
   }
 
@@ -55,15 +52,11 @@ class OverlayService : LifecycleService() {
   private var screenWidth = 0
   private var screenHeight = 0
   private var screenDensityDpi = 0
-
-  // Scale factor: screen coordinates / detection image coordinates
   private var scaleX = 1f
   private var scaleY = 1f
 
-  // Capture loop job
   private var captureJob: Job? = null
 
-  // Detect height proportional to detect width, matching screen aspect ratio
   private val detectHeight: Int
     get() = (DETECT_WIDTH * screenHeight / screenWidth).coerceAtLeast(1)
 
@@ -82,16 +75,19 @@ class OverlayService : LifecycleService() {
       return START_NOT_STICKY
     }
 
-    // Start foreground immediately (required for MediaProjection on Android 10+)
+    // Android 14+ requires foreground startup before MediaProjection token use.
+    // Keep this as the first operational call in service startup.
     startForeground(NOTIFICATION_ID, buildNotification())
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+      Log.d(TAG, "Android 14+ startup path active")
+    }
 
     val extras = intent ?: run {
-      Log.e(TAG, "No intent extras — cannot start")
+      Log.e(TAG, "No intent extras; cannot start")
       stopSelf()
       return START_NOT_STICKY
     }
 
-    // Extract configuration from intent
     val backendUrl = extras.getStringExtra("backendUrl") ?: "http://10.0.2.2:3001"
     val blurMode = extras.getStringExtra("blurMode") ?: "women_only"
     val blurIntensity = extras.getIntExtra("blurIntensity", 85)
@@ -125,6 +121,7 @@ class OverlayService : LifecycleService() {
     setupMediaProjection(resultCode, projectionData)
     startCaptureLoop()
 
+    // Restart with last intent payload if system kills service.
     return START_REDELIVER_INTENT
   }
 
@@ -136,7 +133,6 @@ class OverlayService : LifecycleService() {
     screenHeight = metrics.heightPixels
     screenDensityDpi = metrics.densityDpi
 
-    // Pre-calculate scale factors
     scaleX = screenWidth.toFloat() / DETECT_WIDTH.toFloat()
     scaleY = screenHeight.toFloat() / detectHeight.toFloat()
 
@@ -151,13 +147,11 @@ class OverlayService : LifecycleService() {
     val projectionManager = getSystemService(MEDIA_PROJECTION_SERVICE) as MediaProjectionManager
     mediaProjection = projectionManager.getMediaProjection(resultCode, data)
 
-    // Create ImageReader at detection resolution (640xH) — not full screen
-    // This reduces JPEG payload size and speeds up network transfer
     imageReader = ImageReader.newInstance(
       DETECT_WIDTH,
       detectHeight,
       PixelFormat.RGBA_8888,
-      2, // maxImages buffer
+      2,
     )
 
     virtualDisplay = mediaProjection.createVirtualDisplay(
@@ -181,29 +175,21 @@ class OverlayService : LifecycleService() {
 
       while (isActive) {
         val frameStart = System.currentTimeMillis()
-
-        // 1. Acquire latest frame
         val jpegBytes = captureFrame()
 
         if (jpegBytes != null) {
           frameCount++
           Log.v(TAG, "Frame $frameCount captured (${jpegBytes.size / 1024}KB)")
-
-          // 2. Send to backend for detection
           val result: DetectionResult? = detectionClient.detect(jpegBytes)
-
-          // 3. Update overlay based on result
           result?.let {
             withContext(Dispatchers.Main) {
               blurRenderer.update(it, settings, scaleX, scaleY)
             }
           } ?: withContext(Dispatchers.Main) {
-            // No result means backend offline — clear overlays
             blurRenderer.clear()
           }
         }
 
-        // 4. Throttle to ~5 FPS (200ms per cycle)
         val elapsed = System.currentTimeMillis() - frameStart
         val sleepMs = maxOf(0, 200 - elapsed)
         if (sleepMs > 0) {
@@ -223,7 +209,6 @@ class OverlayService : LifecycleService() {
         val rowStride = planes[0].rowStride
         val rowPadding = rowStride - pixelStride * DETECT_WIDTH
 
-        // Create Bitmap from ImageReader buffer
         val bitmap = Bitmap.createBitmap(
           DETECT_WIDTH + rowPadding / pixelStride,
           detectHeight,
@@ -231,11 +216,9 @@ class OverlayService : LifecycleService() {
         )
         bitmap.copyPixelsFromBuffer(buffer)
 
-        // Crop to exact detect size (removes padding)
         val cropped = Bitmap.createBitmap(bitmap, 0, 0, DETECT_WIDTH, detectHeight)
         bitmap.recycle()
 
-        // Compress to JPEG (quality 70 — good balance of size vs accuracy)
         val stream = ByteArrayOutputStream()
         cropped.compress(Bitmap.CompressFormat.JPEG, 70, stream)
         cropped.recycle()
@@ -244,7 +227,7 @@ class OverlayService : LifecycleService() {
         stream.close()
         bytes
       } finally {
-        image.close() // ALWAYS close — prevents ImageReader stall
+        image.close()
       }
     } catch (error: Exception) {
       Log.e(TAG, "Frame capture error: ${error.message}", error)
@@ -256,40 +239,27 @@ class OverlayService : LifecycleService() {
     super.onDestroy()
     Log.d(TAG, "Service stopping")
     captureJob?.cancel()
-    if (::blurRenderer.isInitialized) {
-      blurRenderer.destroyAll()
-    }
-    if (::virtualDisplay.isInitialized) {
-      virtualDisplay.release()
-    }
-    if (::imageReader.isInitialized) {
-      imageReader.close()
-    }
-    if (::mediaProjection.isInitialized) {
-      mediaProjection.stop()
-    }
+    if (::blurRenderer.isInitialized) blurRenderer.destroyAll()
+    if (::virtualDisplay.isInitialized) virtualDisplay.release()
+    if (::imageReader.isInitialized) imageReader.close()
+    if (::mediaProjection.isInitialized) mediaProjection.stop()
   }
-
-  // ── Notification ────────────────────────────────────────────────────────
 
   private fun createNotificationChannel() {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
       val channel = NotificationChannel(
         CHANNEL_ID,
         "HaramBlur Protection",
-        NotificationManager.IMPORTANCE_LOW, // LOW = no sound, minimal intrusion
+        NotificationManager.IMPORTANCE_LOW,
       ).apply {
         description = "HaramBlur screen protection is active"
       }
-      val manager = getSystemService(NotificationManager::class.java)
-      manager.createNotificationChannel(channel)
+      getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
     }
   }
 
   private fun buildNotification(): Notification {
-    val stopIntent = Intent(this, OverlayService::class.java).apply {
-      action = "STOP"
-    }
+    val stopIntent = Intent(this, OverlayService::class.java).apply { action = "STOP" }
     val stopPendingIntent = PendingIntent.getService(
       this,
       0,
@@ -297,11 +267,11 @@ class OverlayService : LifecycleService() {
       PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
     )
 
-    val openAppIntent = Intent(this, MainActivity::class.java)
+    val openIntent = Intent(this, MainActivity::class.java)
     val openPendingIntent = PendingIntent.getActivity(
       this,
       0,
-      openAppIntent,
+      openIntent,
       PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
     )
 
@@ -309,7 +279,7 @@ class OverlayService : LifecycleService() {
       .setContentTitle(getString(R.string.notification_title))
       .setContentText(getString(R.string.notification_text))
       .setSmallIcon(R.drawable.ic_shield)
-      .setOngoing(true) // Cannot be swiped away
+      .setOngoing(true)
       .setContentIntent(openPendingIntent)
       .addAction(0, "Stop", stopPendingIntent)
       .build()

@@ -2,9 +2,13 @@ package com.haramblur
 
 import android.app.Activity
 import android.content.Intent
+import android.content.SharedPreferences
 import android.content.res.ColorStateList
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.os.PowerManager
+import android.provider.Settings
 import android.util.Log
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -15,29 +19,37 @@ import com.google.android.material.snackbar.Snackbar
 import com.haramblur.databinding.ActivityMainBinding
 import com.haramblur.network.DetectionClient
 import com.haramblur.ui.SettingsActivity
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
   private lateinit var binding: ActivityMainBinding
   private lateinit var permHelper: PermissionHelper
+  private lateinit var prefs: SharedPreferences
   private lateinit var client: DetectionClient
+
   private var isProtectionActive = false
+  private var backendStatusJob: Job? = null
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     binding = ActivityMainBinding.inflate(layoutInflater)
     setContentView(binding.root)
 
+    prefs = getSharedPreferences("haramblur", MODE_PRIVATE)
     permHelper = PermissionHelper(this)
     client = DetectionClient(getBackendUrl())
 
-    // Restore state from SharedPreferences
-    isProtectionActive = getSharedPreferences("haramblur", MODE_PRIVATE)
-      .getBoolean("protection_active", false)
+    isProtectionActive = prefs.getBoolean("protection_active", false)
     updateToggleUI()
 
-    // Main toggle button click
+    if (intent?.getBooleanExtra("restarted_after_boot", false) == true) {
+      showSnackbar("Tap the button to re-enable protection after reboot")
+    }
+    maybePromptBatteryOptimization()
+
     binding.btnToggle.setOnClickListener {
       if (isProtectionActive) {
         stopProtection()
@@ -46,29 +58,24 @@ class MainActivity : AppCompatActivity() {
       }
     }
 
-    // Settings button
     binding.btnSettings.setOnClickListener {
       startActivity(Intent(this, SettingsActivity::class.java))
     }
 
-    // Test mode button — opens React dashboard in browser
     binding.btnTest.setOnClickListener {
       val testUrl = getBackendUrl().replace(":3001", ":5173")
-      val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(testUrl))
-      startActivity(browserIntent)
+      startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(testUrl)))
     }
 
-    // Check backend health on launch
     checkBackendStatus()
   }
 
   private fun startProtectionFlow() {
-    // Step 1: check overlay permission
     if (!permHelper.hasOverlayPermission()) {
       AlertDialog.Builder(this)
         .setTitle(getString(R.string.permission_overlay_title))
         .setMessage(getString(R.string.permission_overlay_msg))
-        .setPositiveButton("Open Settings") { _, _ ->
+        .setPositiveButton(getString(R.string.open_settings)) { _, _ ->
           permHelper.requestOverlayPermission(this)
         }
         .setNegativeButton("Cancel", null)
@@ -76,7 +83,6 @@ class MainActivity : AppCompatActivity() {
       return
     }
 
-    // Step 2: request MediaProjection
     @Suppress("DEPRECATION")
     startActivityForResult(
       permHelper.getScreenCaptureIntent(),
@@ -90,7 +96,7 @@ class MainActivity : AppCompatActivity() {
     when (requestCode) {
       PermissionHelper.REQUEST_OVERLAY_PERMISSION -> {
         if (permHelper.hasOverlayPermission()) {
-          startProtectionFlow() // try again now that permission is granted
+          startProtectionFlow()
         }
       }
 
@@ -105,7 +111,6 @@ class MainActivity : AppCompatActivity() {
   }
 
   private fun launchOverlayService(resultCode: Int, data: Intent) {
-    val prefs = getSharedPreferences("haramblur", MODE_PRIVATE)
     val serviceIntent = Intent(this, OverlayService::class.java).apply {
       putExtra("backendUrl", getBackendUrl())
       putExtra("blurMode", prefs.getString("blurMode", "women_only"))
@@ -119,16 +124,13 @@ class MainActivity : AppCompatActivity() {
     isProtectionActive = true
     prefs.edit().putBoolean("protection_active", true).apply()
     updateToggleUI()
-    showSnackbar("Protection enabled — you can now use other apps")
+    showSnackbar("Protection enabled. You can now use other apps safely.")
   }
 
   private fun stopProtection() {
     stopService(Intent(this, OverlayService::class.java))
     isProtectionActive = false
-    getSharedPreferences("haramblur", MODE_PRIVATE)
-      .edit()
-      .putBoolean("protection_active", false)
-      .apply()
+    prefs.edit().putBoolean("protection_active", false).apply()
     updateToggleUI()
     showSnackbar("Protection disabled")
   }
@@ -149,23 +151,20 @@ class MainActivity : AppCompatActivity() {
       binding.btnToggle.backgroundTintList =
         ColorStateList.valueOf(ColorUtils.setAlphaComponent(emerald, 26))
 
-      binding.ivStatusDot.setBackgroundResource(R.drawable.circle_green)
+      binding.ivStatusDot.setBackgroundResource(R.drawable.circle_pink)
     } else {
       binding.tvToggleStatus.text = "Protection OFF"
       binding.tvToggleSubtitle.text = "Tap to enable"
       binding.btnToggle.iconTint = iconOff
       binding.btnToggle.strokeColor = strokeOff
       binding.btnToggle.backgroundTintList =
-        ColorStateList.valueOf(
-          ContextCompat.getColor(this, android.R.color.transparent),
-        )
+        ColorStateList.valueOf(ContextCompat.getColor(this, android.R.color.transparent))
       binding.ivStatusDot.setBackgroundResource(R.drawable.circle_gray)
     }
     updateBlurModeLabel()
   }
 
   private fun updateBlurModeLabel() {
-    val prefs = getSharedPreferences("haramblur", MODE_PRIVATE)
     val blurMode = prefs.getString("blurMode", "women_only")
     binding.tvBlurMode.text = when (blurMode) {
       "women_only" -> "Blurring: Women's faces"
@@ -176,8 +175,9 @@ class MainActivity : AppCompatActivity() {
   }
 
   private fun checkBackendStatus() {
-    lifecycleScope.launch {
-      while (true) {
+    backendStatusJob?.cancel()
+    backendStatusJob = lifecycleScope.launch {
+      while (isActive) {
         val ok = client.checkHealth()
         if (ok) {
           binding.tvBackendStatus.text = "Backend Ready"
@@ -187,24 +187,60 @@ class MainActivity : AppCompatActivity() {
           binding.ivBackendDot.setBackgroundResource(R.drawable.circle_red)
           Log.w("HaramBlur", "Backend health check failed for ${getBackendUrl()}")
         }
-        delay(10_000) // check every 10 seconds
+        delay(10_000)
       }
     }
   }
 
+  private fun maybePromptBatteryOptimization() {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+      return
+    }
+
+    val pm = getSystemService(POWER_SERVICE) as PowerManager
+    if (pm.isIgnoringBatteryOptimizations(packageName)) {
+      return
+    }
+
+    if (prefs.getBoolean("asked_battery_opt", false)) {
+      return
+    }
+
+    prefs.edit().putBoolean("asked_battery_opt", true).apply()
+    AlertDialog.Builder(this)
+      .setTitle("Disable Battery Optimization")
+      .setMessage(
+        "To keep HaramBlur running reliably in the background, " +
+          "please disable battery optimization for this app.",
+      )
+      .setPositiveButton("Open Settings") { _, _ ->
+        val intent = Intent(
+          Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
+          Uri.parse("package:$packageName"),
+        )
+        startActivity(intent)
+      }
+      .setNegativeButton("Later", null)
+      .show()
+  }
+
   private fun getBackendUrl(): String {
-    return getSharedPreferences("haramblur", MODE_PRIVATE)
-      .getString("backendUrl", "http://10.0.2.2:3001") ?: "http://10.0.2.2:3001"
+    return prefs.getString("backendUrl", "http://10.0.2.2:3001") ?: "http://10.0.2.2:3001"
   }
 
   private fun showSnackbar(message: String) {
-    Snackbar
-      .make(binding.root, message, Snackbar.LENGTH_LONG)
-      .show()
+    Snackbar.make(binding.root, message, Snackbar.LENGTH_LONG).show()
   }
 
   override fun onResume() {
     super.onResume()
-    updateBlurModeLabel() // refresh after returning from SettingsActivity
+    updateBlurModeLabel()
+    client.updateBaseUrl(getBackendUrl())
+    checkBackendStatus()
+  }
+
+  override fun onDestroy() {
+    super.onDestroy()
+    backendStatusJob?.cancel()
   }
 }

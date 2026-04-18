@@ -5,17 +5,26 @@
   android:layout_height="match_parent"
   android:background="@color/background">
 
+  <View
+    android:layout_width="match_parent"
+    android:layout_height="120dp"
+    android:background="@drawable/bg_main_top_glow" />
+
   <com.google.android.material.appbar.AppBarLayout
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@color/card_background">
+    android:background="@android:color/transparent"
+    android:elevation="0dp">
 
     <com.google.android.material.appbar.MaterialToolbar
       android:id="@+id/toolbar"
       android:layout_width="match_parent"
       android:layout_height="?attr/actionBarSize"
+      android:background="@android:color/transparent"
+      android:paddingHorizontal="8dp"
       android:title="Settings"
-      android:titleTextColor="@color/text_primary" />
+      app:titleCentered="true"
+      android:titleTextColor="@color/accent_emerald" />
   </com.google.android.material.appbar.AppBarLayout>
 
   <androidx.core.widget.NestedScrollView
@@ -33,9 +42,10 @@
       <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="12dp"
+        android:layout_marginBottom="14dp"
         app:cardBackgroundColor="@color/card_background"
-        app:cardCornerRadius="16dp"
+        app:cardCornerRadius="18dp"
+        app:cardElevation="0dp"
         app:contentPadding="16dp"
         app:strokeColor="@color/card_border"
         app:strokeWidth="1dp">
@@ -51,27 +61,35 @@
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
+            <TextView
+              android:layout_width="0dp"
+              android:layout_height="wrap_content"
+              android:layout_weight="1"
+              android:text="Protection Mode"
+              android:textColor="@color/text_primary"
+              android:textSize="28sp"
+              android:textStyle="bold" />
+
             <ImageView
               android:layout_width="20dp"
               android:layout_height="20dp"
               android:src="@drawable/ic_shield"
               android:tint="@color/accent_emerald" />
-
-            <TextView
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:layout_marginStart="8dp"
-              android:text="Protection Mode"
-              android:textColor="@color/text_primary"
-              android:textSize="16sp"
-              android:textStyle="bold" />
           </LinearLayout>
+
+          <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="Configure target detection parameters."
+            android:textColor="@color/text_secondary"
+            android:textSize="13sp" />
 
           <com.google.android.material.button.MaterialButtonToggleGroup
             android:id="@+id/toggleBlurMode"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="14dp"
             app:selectionRequired="true"
             app:singleSelection="true">
 
@@ -103,43 +121,43 @@
           <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:layout_marginTop="14dp"
+            android:layout_marginTop="16dp"
             android:layout_marginBottom="14dp"
             android:background="@color/card_border" />
-
-          <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Gender threshold"
-            android:textColor="@color/text_secondary"
-            android:textSize="13sp" />
 
           <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
-            <com.google.android.material.slider.Slider
-              android:id="@+id/sliderGenderThreshold"
+            <TextView
               android:layout_width="0dp"
               android:layout_height="wrap_content"
               android:layout_weight="1"
-              android:value="0.6"
-              android:valueFrom="0.5"
-              android:valueTo="0.95"
-              android:stepSize="0.05" />
+              android:text="Gender Threshold"
+              android:textColor="@color/text_primary"
+              android:textSize="16sp" />
 
             <TextView
               android:id="@+id/tvGenderValue"
               android:layout_width="wrap_content"
               android:layout_height="wrap_content"
-              android:layout_marginStart="8dp"
               android:text="60%"
-              android:textColor="@color/text_primary"
+              android:textColor="@color/accent_emerald"
+              android:textSize="16sp"
               android:textStyle="bold" />
           </LinearLayout>
+
+          <com.google.android.material.slider.Slider
+            android:id="@+id/sliderGenderThreshold"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:stepSize="0.05"
+            android:value="0.6"
+            android:valueFrom="0.5"
+            android:valueTo="0.95" />
 
           <TextView
             android:layout_width="match_parent"
@@ -148,29 +166,39 @@
             android:textColor="@color/text_secondary"
             android:textSize="12sp" />
 
-          <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_marginTop="14dp"
-            android:layout_marginBottom="12dp"
-            android:background="@color/card_border" />
-
-          <com.google.android.material.switchmaterial.SwitchMaterial
-            android:id="@+id/switchDetectFaces"
+          <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:checked="true"
-            android:text="Detect Faces"
-            android:textColor="@color/text_primary" />
+            android:layout_marginTop="14dp"
+            android:background="@drawable/bg_status_strip"
+            android:gravity="center_vertical"
+            android:minHeight="50dp"
+            android:paddingHorizontal="12dp">
+
+            <TextView
+              android:layout_width="0dp"
+              android:layout_height="wrap_content"
+              android:layout_weight="1"
+              android:text="Detect Faces"
+              android:textColor="@color/text_primary"
+              android:textSize="15sp" />
+
+            <com.google.android.material.switchmaterial.SwitchMaterial
+              android:id="@+id/switchDetectFaces"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:checked="true" />
+          </LinearLayout>
         </LinearLayout>
       </com.google.android.material.card.MaterialCardView>
 
       <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="12dp"
+        android:layout_marginBottom="14dp"
         app:cardBackgroundColor="@color/card_background"
-        app:cardCornerRadius="16dp"
+        app:cardCornerRadius="18dp"
+        app:cardElevation="0dp"
         app:contentPadding="16dp"
         app:strokeColor="@color/card_border"
         app:strokeWidth="1dp">
@@ -186,69 +214,77 @@
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
+            <TextView
+              android:layout_width="0dp"
+              android:layout_height="wrap_content"
+              android:layout_weight="1"
+              android:text="Content Safety"
+              android:textColor="@color/text_primary"
+              android:textSize="28sp"
+              android:textStyle="bold" />
+
             <ImageView
               android:layout_width="20dp"
               android:layout_height="20dp"
               android:src="@android:drawable/ic_dialog_alert"
-              android:tint="@color/accent_emerald" />
-
-            <TextView
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:layout_marginStart="8dp"
-              android:text="Content Safety"
-              android:textColor="@color/text_primary"
-              android:textSize="16sp"
-              android:textStyle="bold" />
+              android:tint="@color/female_pink" />
           </LinearLayout>
 
           <TextView
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:text="NSFW Sensitivity"
+            android:layout_marginTop="4dp"
+            android:text="Adjust sensitivity for explicit content."
             android:textColor="@color/text_secondary"
             android:textSize="13sp" />
-
-          <com.google.android.material.slider.Slider
-            android:id="@+id/sliderNsfwThreshold"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:value="0.5"
-            android:valueFrom="0.1"
-            android:valueTo="0.95"
-            android:stepSize="0.05" />
 
           <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
             <TextView
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:text="Strict"
-              android:textColor="@color/text_secondary"
-              android:textSize="12sp" />
-
-            <Space
               android:layout_width="0dp"
-              android:layout_height="1dp"
-              android:layout_weight="1" />
+              android:layout_height="wrap_content"
+              android:layout_weight="1"
+              android:text="NSFW Sensitivity"
+              android:textColor="@color/text_primary"
+              android:textSize="16sp" />
 
             <TextView
               android:id="@+id/tvNsfwValue"
               android:layout_width="wrap_content"
               android:layout_height="wrap_content"
               android:text="0.50"
-              android:textColor="@color/text_primary"
+              android:textColor="@color/female_pink"
+              android:textSize="16sp"
               android:textStyle="bold" />
+          </LinearLayout>
 
-            <Space
+          <com.google.android.material.slider.Slider
+            android:id="@+id/sliderNsfwThreshold"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:stepSize="0.05"
+            android:value="0.5"
+            android:valueFrom="0.1"
+            android:valueTo="0.95" />
+
+          <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
               android:layout_width="0dp"
-              android:layout_height="1dp"
-              android:layout_weight="1" />
+              android:layout_height="wrap_content"
+              android:layout_weight="1"
+              android:text="Strict"
+              android:textColor="@color/text_secondary"
+              android:textSize="12sp" />
 
             <TextView
               android:layout_width="wrap_content"
@@ -266,29 +302,39 @@
             android:textColor="@color/text_secondary"
             android:textSize="12sp" />
 
-          <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:layout_marginTop="14dp"
-            android:layout_marginBottom="12dp"
-            android:background="@color/card_border" />
-
-          <com.google.android.material.switchmaterial.SwitchMaterial
-            android:id="@+id/switchDetectNsfw"
+          <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:checked="true"
-            android:text="Detect NSFW Content"
-            android:textColor="@color/text_primary" />
+            android:layout_marginTop="14dp"
+            android:background="@drawable/bg_status_strip"
+            android:gravity="center_vertical"
+            android:minHeight="50dp"
+            android:paddingHorizontal="12dp">
+
+            <TextView
+              android:layout_width="0dp"
+              android:layout_height="wrap_content"
+              android:layout_weight="1"
+              android:text="Detect NSFW"
+              android:textColor="@color/text_primary"
+              android:textSize="15sp" />
+
+            <com.google.android.material.switchmaterial.SwitchMaterial
+              android:id="@+id/switchDetectNsfw"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:checked="true" />
+          </LinearLayout>
         </LinearLayout>
       </com.google.android.material.card.MaterialCardView>
 
       <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="12dp"
+        android:layout_marginBottom="14dp"
         app:cardBackgroundColor="@color/card_background"
-        app:cardCornerRadius="16dp"
+        app:cardCornerRadius="18dp"
+        app:cardElevation="0dp"
         app:contentPadding="16dp"
         app:strokeColor="@color/card_border"
         app:strokeWidth="1dp">
@@ -304,69 +350,69 @@
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
+            <TextView
+              android:layout_width="0dp"
+              android:layout_height="wrap_content"
+              android:layout_weight="1"
+              android:text="Appearance"
+              android:textColor="@color/text_primary"
+              android:textSize="28sp"
+              android:textStyle="bold" />
+
             <ImageView
               android:layout_width="20dp"
               android:layout_height="20dp"
               android:src="@android:drawable/ic_menu_view"
-              android:tint="@color/accent_emerald" />
-
-            <TextView
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:layout_marginStart="8dp"
-              android:text="Appearance"
-              android:textColor="@color/text_primary"
-              android:textSize="16sp"
-              android:textStyle="bold" />
+              android:tint="@color/text_secondary" />
           </LinearLayout>
-
-          <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:text="Blur Intensity"
-            android:textColor="@color/text_secondary"
-            android:textSize="13sp" />
-
-          <com.google.android.material.slider.Slider
-            android:id="@+id/sliderBlurIntensity"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:value="85"
-            android:valueFrom="0"
-            android:valueTo="100"
-            android:stepSize="5" />
 
           <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
             <TextView
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:text="None"
-              android:textColor="@color/text_secondary"
-              android:textSize="12sp" />
-
-            <Space
               android:layout_width="0dp"
-              android:layout_height="1dp"
-              android:layout_weight="1" />
+              android:layout_height="wrap_content"
+              android:layout_weight="1"
+              android:text="Blur Intensity"
+              android:textColor="@color/text_primary"
+              android:textSize="16sp" />
 
             <TextView
               android:id="@+id/tvBlurValue"
               android:layout_width="wrap_content"
               android:layout_height="wrap_content"
               android:text="85"
-              android:textColor="@color/text_primary"
+              android:textColor="@color/accent_emerald"
+              android:textSize="16sp"
               android:textStyle="bold" />
+          </LinearLayout>
 
-            <Space
+          <com.google.android.material.slider.Slider
+            android:id="@+id/sliderBlurIntensity"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:stepSize="5"
+            android:value="85"
+            android:valueFrom="0"
+            android:valueTo="100" />
+
+          <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
               android:layout_width="0dp"
-              android:layout_height="1dp"
-              android:layout_weight="1" />
+              android:layout_height="wrap_content"
+              android:layout_weight="1"
+              android:text="None"
+              android:textColor="@color/text_secondary"
+              android:textSize="12sp" />
 
             <TextView
               android:layout_width="wrap_content"
@@ -381,9 +427,10 @@
       <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="12dp"
+        android:layout_marginBottom="14dp"
         app:cardBackgroundColor="@color/card_background"
-        app:cardCornerRadius="16dp"
+        app:cardCornerRadius="18dp"
+        app:cardElevation="0dp"
         app:contentPadding="16dp"
         app:strokeColor="@color/card_border"
         app:strokeWidth="1dp">
@@ -393,27 +440,21 @@
           android:layout_height="wrap_content"
           android:orientation="vertical">
 
-          <LinearLayout
+          <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
+            android:text="Backend Configuration"
+            android:textColor="@color/text_primary"
+            android:textSize="28sp"
+            android:textStyle="bold" />
 
-            <ImageView
-              android:layout_width="20dp"
-              android:layout_height="20dp"
-              android:src="@android:drawable/ic_menu_manage"
-              android:tint="@color/accent_emerald" />
-
-            <TextView
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:layout_marginStart="8dp"
-              android:text="Backend Connection"
-              android:textColor="@color/text_primary"
-              android:textSize="16sp"
-              android:textStyle="bold" />
-          </LinearLayout>
+          <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="Connection details for inference engine."
+            android:textColor="@color/text_secondary"
+            android:textSize="13sp" />
 
           <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
@@ -430,58 +471,45 @@
               android:inputType="textUri" />
           </com.google.android.material.textfield.TextInputLayout>
 
-          <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:gravity="center_vertical"
-            android:orientation="horizontal">
-
-            <com.google.android.material.button.MaterialButton
-              android:id="@+id/btnTestConnection"
-              style="?attr/materialButtonOutlinedStyle"
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:text="Test Connection" />
-
-            <TextView
-              android:id="@+id/tvConnectionStatus"
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:layout_marginStart="12dp"
-              android:text=""
-              android:textColor="@color/text_secondary"
-              android:textSize="13sp" />
-          </LinearLayout>
-
           <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnSaveUrl"
+            android:id="@+id/btnTestConnection"
             style="?attr/materialButtonOutlinedStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:text="Save URL" />
+            android:text="Test Connection" />
+
+          <TextView
+            android:id="@+id/tvConnectionStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:gravity="center"
+            android:text=""
+            android:textColor="@color/text_secondary"
+            android:textSize="13sp" />
+
+          <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSaveUrl"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:backgroundTint="@color/accent_emerald"
+            android:text="Save URL"
+            android:textColor="@color/background" />
         </LinearLayout>
       </com.google.android.material.card.MaterialCardView>
 
-      <com.google.android.material.card.MaterialCardView
+      <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnResetDefaults"
+        style="?attr/materialButtonOutlinedStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:cardBackgroundColor="@color/card_background"
-        app:cardCornerRadius="16dp"
-        app:contentPadding="16dp"
-        app:strokeColor="@color/card_border"
-        app:strokeWidth="1dp">
-
-        <com.google.android.material.button.MaterialButton
-          android:id="@+id/btnResetDefaults"
-          style="?attr/materialButtonOutlinedStyle"
-          android:layout_width="match_parent"
-          android:layout_height="wrap_content"
-          android:text="Reset to Defaults"
-          android:textColor="@color/danger_red"
-          app:strokeColor="@color/danger_red" />
-      </com.google.android.material.card.MaterialCardView>
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="24dp"
+        android:text="Reset to Defaults"
+        android:textColor="@color/danger_red"
+        app:strokeColor="@color/danger_red" />
     </LinearLayout>
   </androidx.core.widget.NestedScrollView>
 

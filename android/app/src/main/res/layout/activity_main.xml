@@ -5,208 +5,344 @@
   android:layout_height="match_parent"
   android:background="@color/background">
 
-  <androidx.constraintlayout.widget.Guideline
-    android:id="@+id/guidelineTop20"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    app:layout_constraintGuide_percent="0.20" />
+  <View
+    android:id="@+id/headerGlow"
+    android:layout_width="0dp"
+    android:layout_height="220dp"
+    android:background="@drawable/bg_main_top_glow"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent" />
 
   <LinearLayout
-    android:id="@+id/topSection"
+    android:id="@+id/topBrandBar"
     android:layout_width="0dp"
-    android:layout_height="0dp"
-    android:gravity="center"
-    android:orientation="vertical"
-    app:layout_constraintBottom_toTopOf="@id/cardContainer"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="22dp"
+    android:layout_marginTop="24dp"
+    android:layout_marginEnd="22dp"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toTopOf="parent">
 
     <ImageView
-      android:id="@+id/ivShield"
-      android:layout_width="80dp"
-      android:layout_height="80dp"
+      android:layout_width="22dp"
+      android:layout_height="22dp"
       android:src="@drawable/ic_shield"
       android:tint="@color/accent_emerald" />
+
+    <TextView
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_marginStart="10dp"
+      android:text="Obsidian Sentinel"
+      android:textColor="@color/accent_emerald"
+      android:textSize="18sp"
+      android:textStyle="bold" />
+
+    <Space
+      android:layout_width="0dp"
+      android:layout_height="1dp"
+      android:layout_weight="1" />
+
+    <ImageView
+      android:layout_width="34dp"
+      android:layout_height="34dp"
+      android:padding="6dp"
+      android:src="@android:drawable/ic_menu_myplaces"
+      android:tint="@color/text_secondary" />
+  </LinearLayout>
+
+  <LinearLayout
+    android:id="@+id/heroSection"
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    android:layout_marginStart="24dp"
+    android:layout_marginTop="28dp"
+    android:layout_marginEnd="24dp"
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@id/topBrandBar">
+
+    <com.google.android.material.card.MaterialCardView
+      android:layout_width="92dp"
+      android:layout_height="92dp"
+      app:cardBackgroundColor="@color/card_background"
+      app:cardCornerRadius="24dp"
+      app:cardElevation="0dp"
+      app:strokeColor="@color/card_border"
+      app:strokeWidth="1dp">
+
+      <ImageView
+        android:id="@+id/ivShield"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="20dp"
+        android:src="@drawable/ic_shield"
+        android:tint="@color/accent_emerald" />
+    </com.google.android.material.card.MaterialCardView>
 
     <TextView
       android:id="@+id/tvTitle"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:layout_marginTop="8dp"
+      android:layout_marginTop="20dp"
       android:text="HaramBlur"
       android:textColor="@color/text_primary"
-      android:textSize="28sp"
+      android:textSize="44sp"
       android:textStyle="bold" />
 
     <TextView
       android:id="@+id/tvSubtitle"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:layout_marginTop="4dp"
+      android:layout_marginTop="6dp"
       android:text="Islamic screen protection"
       android:textColor="@color/text_secondary"
-      android:textSize="14sp" />
+      android:textSize="16sp" />
   </LinearLayout>
 
   <com.google.android.material.card.MaterialCardView
     android:id="@+id/cardContainer"
     android:layout_width="0dp"
     android:layout_height="wrap_content"
-    android:layout_marginHorizontal="24dp"
-    app:cardBackgroundColor="@color/card_background"
-    app:cardCornerRadius="16dp"
+    android:layout_marginStart="20dp"
+    android:layout_marginTop="22dp"
+    android:layout_marginEnd="20dp"
+    android:background="@drawable/bg_card_glass"
+    app:cardBackgroundColor="@android:color/transparent"
+    app:cardCornerRadius="26dp"
+    app:cardElevation="0dp"
     app:contentPadding="24dp"
-    app:layout_constraintBottom_toTopOf="@id/bottomSection"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toTopOf="parent"
-    app:layout_constraintVertical_bias="0.62"
+    app:layout_constraintTop_toBottomOf="@id/heroSection"
     app:strokeColor="@color/card_border"
     app:strokeWidth="1dp">
 
     <LinearLayout
       android:layout_width="match_parent"
       android:layout_height="wrap_content"
+      android:gravity="center_horizontal"
       android:orientation="vertical">
 
-      <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnToggle"
-        style="?attr/materialButtonOutlinedStyle"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:layout_gravity="center_horizontal"
-        android:insetTop="0dp"
-        android:insetBottom="0dp"
-        android:minWidth="0dp"
-        android:minHeight="0dp"
-        android:text=""
-        app:cornerRadius="50dp"
-        app:icon="@drawable/ic_power"
-        app:iconGravity="textStart"
-        app:iconPadding="0dp"
-        app:iconSize="40dp"
-        app:iconTint="@color/text_muted"
-        app:strokeColor="@color/text_muted" />
+      <FrameLayout
+        android:layout_width="190dp"
+        android:layout_height="190dp"
+        android:foregroundGravity="center">
+
+        <View
+          android:layout_width="190dp"
+          android:layout_height="190dp"
+          android:background="@drawable/bg_nav_active" />
+
+        <com.google.android.material.button.MaterialButton
+          android:id="@+id/btnToggle"
+          style="?attr/materialButtonOutlinedStyle"
+          android:layout_width="120dp"
+          android:layout_height="120dp"
+          android:layout_gravity="center"
+          android:insetTop="0dp"
+          android:insetBottom="0dp"
+          android:minWidth="0dp"
+          android:minHeight="0dp"
+          android:text=""
+          app:cornerRadius="60dp"
+          app:icon="@drawable/ic_power"
+          app:iconGravity="textStart"
+          app:iconPadding="0dp"
+          app:iconSize="44dp"
+          app:iconTint="@color/background"
+          app:strokeColor="@color/accent_emerald"
+          app:strokeWidth="1dp" />
+      </FrameLayout>
 
       <TextView
         android:id="@+id/tvToggleStatus"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="14dp"
-        android:gravity="center_horizontal"
+        android:layout_marginTop="10dp"
         android:text="Protection OFF"
-        android:textColor="@color/text_primary"
-        android:textSize="18sp"
+        android:textColor="@color/accent_emerald"
+        android:textSize="22sp"
         android:textStyle="bold" />
 
       <TextView
         android:id="@+id/tvToggleSubtitle"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
-        android:gravity="center_horizontal"
         android:text="Tap to enable"
         android:textColor="@color/text_secondary"
-        android:textSize="13sp" />
-
-      <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:layout_marginTop="18dp"
-        android:layout_marginBottom="14dp"
-        android:background="@color/card_border" />
+        android:textSize="14sp" />
 
       <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/bg_status_strip"
         android:gravity="center_vertical"
-        android:orientation="horizontal">
-
-        <View
-          android:id="@+id/ivStatusDot"
-          android:layout_width="8dp"
-          android:layout_height="8dp"
-          android:background="@drawable/circle_gray" />
+        android:minHeight="52dp"
+        android:orientation="horizontal"
+        android:paddingHorizontal="14dp">
 
         <TextView
           android:id="@+id/tvBlurMode"
-          android:layout_width="wrap_content"
+          android:layout_width="0dp"
           android:layout_height="wrap_content"
-          android:layout_marginStart="8dp"
+          android:layout_weight="1"
           android:text="Blurring: Women's faces"
           android:textColor="@color/text_primary"
-          android:textSize="13sp" />
-
-        <Space
-          android:layout_width="0dp"
-          android:layout_height="1dp"
-          android:layout_weight="1" />
+          android:textSize="14sp" />
 
         <View
-          android:id="@+id/ivBackendDot"
-          android:layout_width="6dp"
-          android:layout_height="6dp"
+          android:id="@+id/ivStatusDot"
+          android:layout_width="12dp"
+          android:layout_height="12dp"
           android:background="@drawable/circle_gray" />
+      </LinearLayout>
+
+      <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/bg_status_strip"
+        android:gravity="center_vertical"
+        android:minHeight="52dp"
+        android:orientation="horizontal"
+        android:paddingHorizontal="14dp">
 
         <TextView
           android:id="@+id/tvBackendStatus"
-          android:layout_width="wrap_content"
+          android:layout_width="0dp"
           android:layout_height="wrap_content"
-          android:layout_marginStart="6dp"
+          android:layout_weight="1"
           android:text="Backend Ready"
-          android:textColor="@color/text_secondary"
-          android:textSize="11sp" />
+          android:textColor="@color/text_primary"
+          android:textSize="14sp" />
+
+        <View
+          android:id="@+id/ivBackendDot"
+          android:layout_width="12dp"
+          android:layout_height="12dp"
+          android:background="@drawable/circle_green" />
       </LinearLayout>
     </LinearLayout>
   </com.google.android.material.card.MaterialCardView>
 
   <LinearLayout
-    android:id="@+id/bottomSection"
+    android:id="@+id/bottomActions"
     android:layout_width="0dp"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="32dp"
-    android:gravity="center_horizontal"
-    android:orientation="vertical"
-    app:layout_constraintBottom_toBottomOf="parent"
+    android:layout_marginStart="20dp"
+    android:layout_marginTop="18dp"
+    android:layout_marginEnd="20dp"
+    android:gravity="center"
+    android:orientation="horizontal"
     app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintStart_toStartOf="parent">
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@id/cardContainer">
+
+    <com.google.android.material.button.MaterialButton
+      android:id="@+id/btnSettings"
+      style="?attr/materialButtonOutlinedStyle"
+      android:layout_width="0dp"
+      android:layout_height="64dp"
+      android:layout_marginEnd="8dp"
+      android:layout_weight="1"
+      android:text="Settings"
+      android:textColor="@color/text_primary"
+      app:icon="@drawable/ic_settings"
+      app:iconPadding="8dp"
+      app:strokeColor="@color/card_border" />
+
+    <com.google.android.material.button.MaterialButton
+      android:id="@+id/btnTest"
+      style="?attr/materialButtonOutlinedStyle"
+      android:layout_width="0dp"
+      android:layout_height="64dp"
+      android:layout_marginStart="8dp"
+      android:layout_weight="1"
+      android:text="Test Detection"
+      android:textColor="@color/text_primary"
+      app:icon="@drawable/ic_camera"
+      app:iconPadding="8dp"
+      app:strokeColor="@color/card_border" />
+  </LinearLayout>
+
+  <LinearLayout
+    android:id="@+id/bottomSection"
+    android:layout_width="0dp"
+    android:layout_height="88dp"
+    android:layout_marginStart="20dp"
+    android:layout_marginTop="16dp"
+    android:layout_marginEnd="20dp"
+    android:layout_marginBottom="12dp"
+    android:background="@drawable/bg_bottom_nav"
+    android:gravity="center"
+    android:orientation="horizontal"
+    android:paddingHorizontal="12dp"
+    app:layout_constraintBottom_toTopOf="@id/tvVersion"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@id/bottomActions">
 
     <LinearLayout
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
+      android:layout_width="0dp"
+      android:layout_height="56dp"
+      android:layout_weight="1"
+      android:background="@drawable/bg_nav_active"
       android:gravity="center"
       android:orientation="horizontal">
 
-      <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnSettings"
-        style="?attr/materialButtonOutlinedStyle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Settings"
-        app:icon="@drawable/ic_settings"
-        app:iconPadding="8dp" />
+      <ImageView
+        android:layout_width="18dp"
+        android:layout_height="18dp"
+        android:src="@drawable/ic_settings"
+        android:tint="@color/accent_emerald" />
 
-      <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnTest"
-        style="?attr/materialButtonOutlinedStyle"
+      <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:text="Test Mode"
-        app:icon="@drawable/ic_camera"
-        app:iconPadding="8dp" />
+        android:layout_marginStart="8dp"
+        android:text="Dashboard"
+        android:textColor="@color/accent_emerald"
+        android:textStyle="bold" />
     </LinearLayout>
 
     <TextView
-      android:id="@+id/tvVersion"
-      android:layout_width="wrap_content"
+      android:layout_width="0dp"
       android:layout_height="wrap_content"
-      android:layout_marginTop="10dp"
-      android:text="v1.0.0"
+      android:layout_weight="1"
+      android:gravity="center"
+      android:text="Activity"
       android:textColor="@color/text_muted"
-      android:textSize="11sp" />
+      android:textSize="15sp" />
+
+    <TextView
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      android:layout_weight="1"
+      android:gravity="center"
+      android:text="Settings"
+      android:textColor="@color/text_muted"
+      android:textSize="15sp" />
   </LinearLayout>
+
+  <TextView
+    android:id="@+id/tvVersion"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="12dp"
+    android:text="v1.0.0"
+    android:textColor="@color/text_muted"
+    android:textSize="11sp"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

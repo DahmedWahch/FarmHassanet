@@ -2,7 +2,6 @@ package com.haramblur.ui
 
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.util.Log
 import android.view.MenuItem
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -18,12 +17,10 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class SettingsActivity : AppCompatActivity() {
-
   private lateinit var binding: ActivitySettingsBinding
   private lateinit var prefs: SharedPreferences
   private lateinit var client: DetectionClient
 
-  // Local in-memory settings (updated immediately on any change)
   private var localSettings = AppSettings()
   private var autoSaveJob: Job? = null
 
@@ -39,14 +36,11 @@ class SettingsActivity : AppCompatActivity() {
     val defaultUrl = "http://10.0.2.2:3001"
     client = DetectionClient(prefs.getString("backendUrl", defaultUrl) ?: defaultUrl)
 
-    // Load settings: try backend first, fallback to SharedPreferences
     loadSettings()
-
     setupListeners()
   }
 
   private fun loadSettings() {
-    // Load from local prefs immediately (instant UI)
     localSettings = AppSettings(
       blurMode = prefs.getString("blurMode", "women_only") ?: "women_only",
       blurIntensity = prefs.getInt("blurIntensity", 85),
@@ -57,23 +51,19 @@ class SettingsActivity : AppCompatActivity() {
     )
     applySettingsToUI(localSettings)
 
-    // Then fetch from backend asynchronously to get any remote updates
     lifecycleScope.launch {
       val remote = client.getSettings()
       if (remote != null) {
-        Log.d("Settings", "Loaded from backend: $remote")
         localSettings = remote
         applySettingsToUI(remote)
-        saveToPrefs(remote) // keep local prefs in sync
+        saveToPrefs(remote)
       } else {
-        Log.d("Settings", "Backend offline — using local prefs")
-        showSnackbar("Backend offline — showing local settings", false)
+        showSnackbar("Backend offline - showing local settings", false)
       }
     }
   }
 
   private fun applySettingsToUI(settings: AppSettings) {
-    // Blur mode toggle
     when (settings.blurMode) {
       "women_only" -> binding.toggleBlurMode.check(binding.btnWomenOnly.id)
       "all_faces" -> binding.toggleBlurMode.check(binding.btnAllFaces.id)
@@ -94,15 +84,12 @@ class SettingsActivity : AppCompatActivity() {
   private fun updateSliderLabels(settings: AppSettings) {
     binding.tvGenderValue.text = "${(settings.genderThreshold * 100).toInt()}%"
     binding.tvNsfwValue.text = "%.2f".format(settings.nsfwThreshold)
-    binding.tvBlurValue.text = "${settings.blurIntensity}"
+    binding.tvBlurValue.text = settings.blurIntensity.toString()
   }
 
   private fun setupListeners() {
-    // Blur mode toggle group
     binding.toggleBlurMode.addOnButtonCheckedListener { _, checkedId, isChecked ->
-      if (!isChecked) {
-        return@addOnButtonCheckedListener
-      }
+      if (!isChecked) return@addOnButtonCheckedListener
       localSettings = localSettings.copy(
         blurMode = when (checkedId) {
           binding.btnAllFaces.id -> "all_faces"
@@ -137,13 +124,11 @@ class SettingsActivity : AppCompatActivity() {
 
     binding.sliderBlurIntensity.addOnChangeListener { _, value, _ ->
       localSettings = localSettings.copy(blurIntensity = value.toInt())
-      binding.tvBlurValue.text = "${value.toInt()}"
+      binding.tvBlurValue.text = value.toInt().toString()
       autoSave()
     }
 
-    binding.btnTestConnection.setOnClickListener {
-      testConnection()
-    }
+    binding.btnTestConnection.setOnClickListener { testConnection() }
 
     binding.btnSaveUrl.setOnClickListener {
       val url = binding.etBackendUrl.text?.toString()?.trim().orEmpty()
@@ -162,7 +147,7 @@ class SettingsActivity : AppCompatActivity() {
         .setTitle("Reset to Defaults?")
         .setMessage("This will reset all settings to factory defaults.")
         .setPositiveButton("Reset") { _, _ ->
-          localSettings = AppSettings() // default values
+          localSettings = AppSettings()
           applySettingsToUI(localSettings)
           saveToBackend(localSettings)
           saveToPrefs(localSettings)
@@ -174,7 +159,6 @@ class SettingsActivity : AppCompatActivity() {
   }
 
   private fun autoSave() {
-    // Debounce: wait 600ms after last change before saving
     autoSaveJob?.cancel()
     autoSaveJob = lifecycleScope.launch {
       delay(600)
@@ -198,10 +182,9 @@ class SettingsActivity : AppCompatActivity() {
     lifecycleScope.launch {
       val saved = client.saveSettings(settings)
       if (saved != null) {
-        Log.d("Settings", "Saved to backend: $saved")
         showSnackbar("Settings saved ✓", true)
       } else {
-        Log.w("Settings", "Could not save to backend — kept locally")
+        showSnackbar("Backend save failed - kept locally", false)
       }
     }
   }
