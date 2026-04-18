@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="app_name">HaramBlur</string>
+  <string name="protection_enabled">Protection Active</string>
+  <string name="protection_disabled">Protection Off</string>
+  <string name="notification_title">HaramBlur Active</string>
+  <string name="notification_text">Protecting your screen</string>
+  <string name="permission_overlay_title">Overlay Permission Required</string>
+  <string name="permission_overlay_msg">HaramBlur needs permission to draw over other apps to blur content.</string>
+  <string name="permission_projection_title">Screen Capture Permission</string>
+  <string name="permission_projection_msg">HaramBlur needs to see your screen to detect and blur content.</string>
+  <string name="open_settings">Open Settings</string>
+  <string name="toggle_protection">Enable Protection</string>
+</resources>

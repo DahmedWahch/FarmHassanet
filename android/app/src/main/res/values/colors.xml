@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <color name="background">#0A0F1A</color>
+  <color name="card_background">#111827</color>
+  <color name="card_border">#1E2D4A</color>
+  <color name="accent_emerald">#10B981</color>
+  <color name="female_pink">#EC4899</color>
+  <color name="male_blue">#3B82F6</color>
+  <color name="unknown_amber">#F59E0B</color>
+  <color name="danger_red">#EF4444</color>
+  <color name="text_primary">#E2E8F0</color>
+  <color name="text_secondary">#94A3B8</color>
+  <color name="text_muted">#64748B</color>
+  <color name="white">#FFFFFF</color>
+</resources>

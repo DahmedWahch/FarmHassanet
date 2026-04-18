@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <style name="Theme.HaramBlur" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+    <item name="android:windowBackground">@color/background</item>
+    <item name="colorPrimary">@color/accent_emerald</item>
+    <item name="colorPrimaryVariant">@color/accent_emerald</item>
+    <item name="colorOnPrimary">@color/white</item>
+    <item name="colorSurface">@color/card_background</item>
+    <item name="colorOnSurface">@color/text_primary</item>
+    <item name="android:textColor">@color/text_primary</item>
+    <item name="android:statusBarColor">@color/background</item>
+    <item name="android:navigationBarColor">@color/background</item>
+  </style>
+</resources>
