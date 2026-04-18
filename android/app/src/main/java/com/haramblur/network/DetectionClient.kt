@@ -22,10 +22,25 @@ class DetectionClient(
   private val httpClient: OkHttpClient = OkHttpClient.Builder()
     .addInterceptor(
       HttpLoggingInterceptor().apply {
-        level = HttpLoggingInterceptor.Level.BASIC
+        level = HttpLoggingInterceptor.Level.NONE
       },
     )
     .build()
+
+  suspend fun checkHealth(): Boolean = withContext(Dispatchers.IO) {
+    return@withContext try {
+      val request = Request.Builder()
+        .url("$baseUrl/api/health")
+        .get()
+        .build()
+
+      httpClient.newCall(request).execute().use { response ->
+        response.isSuccessful
+      }
+    } catch (_: IOException) {
+      false
+    }
+  }
 
   suspend fun getModelsStatus(): ModelsStatus = withContext(Dispatchers.IO) {
     val request = Request.Builder()
