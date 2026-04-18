@@ -5,6 +5,6 @@ import { config } from '../config'
 export const upload = multer({
   dest: config.uploadDir,
   limits: {
-    fileSize: config.maxFileSize,
+    fileSize: 20 * 1024 * 1024,
   },
 })
